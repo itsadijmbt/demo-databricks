@@ -4,8 +4,19 @@
   "scope": "global",
   "resources": [],
   "extends": "bu:Engineering",
-  "constraints": {"parameters": {
-    "tool:*/complete": {"max_tokens": {"max": 300000}},
-    "tool:*/generate": {"max_tokens": {"max": 300000}}}},
+  "constraints": {
+    "parameters": {
+      "tool:*/complete": {
+        "max_tokens": {
+          "max": 300000
+        }
+      },
+      "tool:*/generate": {
+        "max_tokens": {
+          "max": 300000
+        }
+      }
+    }
+  },
   "description": "alice -- role: admin"
 }
