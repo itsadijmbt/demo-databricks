@@ -1,0 +1,8 @@
+{
+  "policy_id": "tool:databricks-remote-proxy/execute_sql",
+  "version": "1.0",
+  "scope": "global",
+  "resources": [],
+  "extends": "app:databricks-remote-proxy",
+  "description": "My security policy"
+}
