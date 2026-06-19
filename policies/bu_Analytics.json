@@ -2,14 +2,45 @@
   "policy_id": "bu:Analytics",
   "version": "0.2.4",
   "scope": "global",
-  "resources": ["tool:databricks-remote-proxy/**","tool:*/generate","tool:*/complete"],
+  "resources": [
+    "tool:databricks-remote-proxy/**",
+    "tool:*/generate",
+    "tool:*/complete"
+  ],
   "extends": "company:macaw",
   "constraints": {
     "denied_parameters": {
-      "tool:*/complete": {"model": ["*opus*","*fable*"]},
-      "tool:*/generate": {"model": ["*opus*","*fable*"]}},
+      "tool:*/complete": {
+        "model": [
+          "*opus*",
+          "*fable*"
+        ]
+      },
+      "tool:*/generate": {
+        "model": [
+          "*opus*",
+          "*fable*"
+        ]
+      }
+    },
     "parameters": {
-      "tool:*/complete": {"max_tokens": {"max": 500000}, "model": ["claude-sonnet-4-6"]},
-      "tool:*/generate": {"max_tokens": {"max": 500000}, "model": ["claude-sonnet-4-6"]}}},
+      "tool:*/complete": {
+        "max_tokens": {
+          "max": 500000
+        },
+        "model": [
+          "claude-sonnet-4-6"
+        ]
+      },
+      "tool:*/generate": {
+        "max_tokens": {
+          "max": 500000
+        },
+        "model": [
+          "claude-sonnet-4-6"
+        ]
+      }
+    }
+  },
   "description": "Analytics BU."
 }
