@@ -1,20 +1,23 @@
 {
-    "policy_id": "company:MACAW",
-    "version": "0.2.0",
-    "scope": "global",
-    "description": "ROOT org policy.",
-    "resources": [
-        "tool:**"
-    ],
-    "denied_resources": [],
-    "constraints": {
-        "parameters": {
-            "tool:*/generate": {
-                "max_tokens": { "max": 1000000 }
-            },
-            "tool:*/complete": {
-                "max_tokens": { "max": 1000000 }
-            }
+  "policy_id": "company:macaw",
+  "version": "0.2.1",
+  "scope": "global",
+  "resources": [
+    "tool:**"
+  ],
+  "constraints": {
+    "parameters": {
+      "tool:*/complete": {
+        "max_tokens": {
+          "max": 2000000
         }
+      },
+      "tool:*/generate": {
+        "max_tokens": {
+          "max": 2000000
+        }
+      }
     }
+  },
+  "description": "ROOT org policy."
 }
