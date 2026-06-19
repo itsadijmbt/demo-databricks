@@ -1,0 +1,368 @@
+{
+  "policy_id": "app:secure-claudecode",
+  "version": "2.5.6",
+  "scope": "app",
+  "resources": [
+    "tool:agent",
+    "tool:bash",
+    "tool:write",
+    "tool:edit",
+    "tool:read",
+    "tool:glob",
+    "tool:grep",
+    "tool:webfetch",
+    "tool:websearch",
+    "tool:notebookedit",
+    "tool:task",
+    "tool:taskoutput",
+    "tool:lsp",
+    "tool:todowrite",
+    "tool:askuserquestion",
+    "tool:killshell",
+    "tool:enterplanmode",
+    "tool:exitplanmode",
+    "tool:skill",
+    "tool:secure-claudecode/generate",
+    "tool:secure-claudecode/messages",
+    "tool:secure-claudecode/chat/completions",
+    "tool:secure-claudecode/embeddings",
+    "skill:**",
+    "mcp:**",
+    "command:base",
+    "mcp:databricks-MACAW-bob/**",
+    "mcp:databricks-MACAW-alice/**"
+  ],
+  "denied_resources": [
+    "mcp:github-MACAW-bob/**"
+  ],
+  "constraints": {
+    "attestations": {
+      "archive_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Archive extraction - unzip, tar -x, gunzip (risk2)",
+        "one_time": false,
+        "priority": 35,
+        "time_to_live": 14400,
+        "timeout": 300
+      },
+      "archive_system_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Archive extraction to system paths (risk3 escalated)",
+        "one_time": true,
+        "priority": 89,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "breadth_25_approved": {
+        "approval_criteria": "role:admin",
+        "description": "25+ tasks spawned in session - session approval (risk2)",
+        "one_time": false,
+        "priority": 65,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "breadth_50_approved": {
+        "approval_criteria": "role:admin",
+        "description": "50+ tasks spawned in session - per-task approval (risk3)",
+        "one_time": true,
+        "priority": 88,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "compile_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Build/compile operations - gcc, make, cargo build (risk2)",
+        "one_time": false,
+        "priority": 20,
+        "time_to_live": 28800,
+        "timeout": 300
+      },
+      "container_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Container operations - docker exec, kubectl exec (risk2)",
+        "one_time": false,
+        "priority": 45,
+        "time_to_live": 3600,
+        "timeout": 300
+      },
+      "credential_access_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Access to credentials/secrets - .env, .ssh (risk3)",
+        "one_time": true,
+        "priority": 90,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "credential_exfil_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Credential access + network egress combination (risk4 - potential exfiltration; e.g. ssh -i is auth, cat key | curl is exfil)",
+        "one_time": true,
+        "priority": 96,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "cron_schedule_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Scheduled task creation - admin approval for persistence (risk4)",
+        "one_time": true,
+        "priority": 95,
+        "time_to_live": 0,
+        "timeout": 300
+      },
+      "depth_10_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Task depth exceeds 10 - per-task approval required (risk3)",
+        "one_time": true,
+        "priority": 85,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "depth_5_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Task depth exceeds 5 - session approval for nested tasks (risk2)",
+        "one_time": false,
+        "priority": 70,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "destructive_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Destructive operations - rm -rf, git reset --hard (risk3)",
+        "one_time": false,
+        "priority": 60,
+        "time_to_live": 3600,
+        "timeout": 300
+      },
+      "escalation_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Privilege escalation - sudo, setuid, unbounded vars (risk4)",
+        "one_time": true,
+        "priority": 100,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "git_destructive_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Destructive git ops - push --force, reset --hard (risk3)",
+        "one_time": false,
+        "priority": 65,
+        "time_to_live": 1800,
+        "timeout": 300
+      },
+      "heredoc_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Here-document content requiring inspection (risk3)",
+        "one_time": true,
+        "priority": 75,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "indirect_exec_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Indirect execution - eval, source, bash -c (risk3)",
+        "one_time": true,
+        "priority": 92,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "internal_network_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Internal network access - localhost, private IPs, .local domains (risk3)",
+        "one_time": true,
+        "priority": 75,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "interpreter_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Interpreter inline execution - python -c, node -e (risk2)",
+        "one_time": false,
+        "priority": 40,
+        "time_to_live": 3600,
+        "timeout": 300
+      },
+      "key_generation_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Cryptographic key generation - ssh-keygen, openssl, gpg (risk4)",
+        "one_time": true,
+        "priority": 94,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "mount_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Mount/filesystem operations - mount, cryptsetup (risk4)",
+        "one_time": true,
+        "priority": 96,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "network_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Network read operations - curl GET, npm install (risk2)",
+        "one_time": false,
+        "priority": 30,
+        "time_to_live": 28800,
+        "timeout": 300
+      },
+      "network_egress_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Network egress with data - curl -d POST, scp (risk3)",
+        "one_time": true,
+        "priority": 85,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "network_shell_escape_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Network + shell escape combination (risk4 - potential RCE via controlled input)",
+        "one_time": true,
+        "priority": 96,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "operation_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Generic operation approval (risk2 fallback)",
+        "one_time": false,
+        "priority": 55,
+        "time_to_live": 28800,
+        "timeout": 300
+      },
+      "permission_modify_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Permission modifications - chmod 777, chmod +s (risk3)",
+        "one_time": false,
+        "priority": 70,
+        "time_to_live": 1800,
+        "timeout": 300
+      },
+      "persistence_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Persistence mechanisms - crontab, ~/.bashrc (risk3)",
+        "one_time": true,
+        "priority": 88,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "pipeline_exec_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Pipeline with execution stage - curl | bash (risk4)",
+        "one_time": true,
+        "priority": 95,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "process_control_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Process control - pkill, kill -9, reboot (risk3)",
+        "one_time": true,
+        "priority": 80,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "remote_code_exec_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Remote code execution pattern detected (risk4)",
+        "one_time": true,
+        "priority": 97,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "runtime_variables_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Commands with dynamic environment variables (risk3)",
+        "one_time": true,
+        "priority": 78,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "security_policy_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Security policy modification - iptables, selinux, apparmor (risk4)",
+        "one_time": true,
+        "priority": 99,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "shell_escape_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Programs that can spawn shells - vim, less, man (risk2)",
+        "one_time": false,
+        "priority": 50,
+        "time_to_live": 3600,
+        "timeout": 300
+      },
+      "system_config_approved": {
+        "approval_criteria": "role:admin",
+        "description": "System configuration modification - /etc/*, sysctl (risk3)",
+        "one_time": true,
+        "priority": 88,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "system_service_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Service control - systemctl, crontab, launchctl (risk3)",
+        "one_time": true,
+        "priority": 82,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "unknown_command_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Unknown command not in any category (risk2, conservative)",
+        "one_time": false,
+        "priority": 50,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "unknown_mcp_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Unknown MCP server/tool without specific policy (risk2, conservative)",
+        "one_time": false,
+        "priority": 54,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "unknown_skill_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Unknown skill without specific policy (risk2, conservative)",
+        "one_time": false,
+        "priority": 52,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "user_management_approved": {
+        "approval_criteria": "role:admin",
+        "description": "User/group management - useradd, passwd, visudo (risk4)",
+        "one_time": true,
+        "priority": 98,
+        "time_to_live": 300,
+        "timeout": 300
+      },
+      "write_approved": {
+        "approval_criteria": "role:admin",
+        "description": "Workspace file modifications (risk1)",
+        "one_time": false,
+        "priority": 10,
+        "time_to_live": 28800,
+        "timeout": 300
+      }
+    },
+    "denied_parameters": {
+      "tool:**": {
+        "file_path": [
+          "/etc/shadow",
+          "/etc/sudoers",
+          "/etc/sudoers.d/*",
+          "/proc/**",
+          "/sys/**",
+          "/boot/**",
+          "/dev/**"
+        ]
+      }
+    }
+  },
+  "description": "SecureClaudeCode v2.5 - Enhanced grant model with priority ordering, pipeline analysis, and categorical GTFOBins coverage."
+}
