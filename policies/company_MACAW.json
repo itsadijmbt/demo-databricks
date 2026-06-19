@@ -1,0 +1,20 @@
+{
+    "policy_id": "company:MACAW",
+    "version": "0.2.0",
+    "scope": "global",
+    "description": "ROOT org policy.",
+    "resources": [
+        "tool:**"
+    ],
+    "denied_resources": [],
+    "constraints": {
+        "parameters": {
+            "tool:*/generate": {
+                "max_tokens": { "max": 1000000 }
+            },
+            "tool:*/complete": {
+                "max_tokens": { "max": 1000000 }
+            }
+        }
+    }
+}

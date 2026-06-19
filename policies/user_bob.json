@@ -1,0 +1,18 @@
+{
+  "policy_id": "user:bob",
+  "version": "0.2.4",
+  "scope": "global",
+  "resources": [],
+  "extends": "bu:Engineering",
+  "constraints": {
+    "attestations": {"allow_write": {"approval_criteria": "role:admin","one_time": true,"time_to_live": 300,"timeout": 300}},
+    "denied_parameters": {
+      "tool:databricks-remote-proxy/execute_sql": {"query": ["*DROP *","*drop *","*DELETE *","*delete *","*TRUNCATE*","*truncate*","*ALTER *","*alter *","*REVOKE*","*revoke*","*GRANT *","*grant *","*VACUUM*","*vacuum*","*hr_salaries*"]},
+      "tool:databricks-remote-proxy/execute_sql_read_only": {"query": ["*DROP *","*drop *","*DELETE *","*delete *","*TRUNCATE*","*truncate*","*ALTER *","*alter *","*REVOKE*","*revoke*","*GRANT *","*grant *","*VACUUM*","*vacuum*","*hr_salaries*"]},
+      "tool:github-remote-proxy/get_file_contents": {"path": ["*.env*","*id_rsa*","*.pem","*.p12","*.pfx","*credentials*","*.npmrc","*.pypirc","*secrets*"]}},
+    "parameters": {
+      "tool:*/complete": {"max_tokens": {"max": 100000}},
+      "tool:*/generate": {"max_tokens": {"max": 100000}}}},
+  "attestations": ["allow_write::{ params.query MATCHES '*INSERT INTO*' OR params.query MATCHES '*insert into*' OR params.query MATCHES '*UPDATE *' OR params.query MATCHES '*update *' OR params.query MATCHES '*MERGE INTO*' OR params.query MATCHES '*merge into*' OR params.query MATCHES '*CREATE TABLE*' OR params.query MATCHES '*create table*' OR params.query MATCHES '*COPY INTO*' OR params.query MATCHES '*copy into*' }"],
+  "description": "bob -- role: manager"
+}

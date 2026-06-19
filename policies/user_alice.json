@@ -1,0 +1,11 @@
+{
+  "policy_id": "user:alice",
+  "version": "0.2.0",
+  "scope": "global",
+  "resources": [],
+  "extends": "bu:Engineering",
+  "constraints": {"parameters": {
+    "tool:*/complete": {"max_tokens": {"max": 300000}},
+    "tool:*/generate": {"max_tokens": {"max": 300000}}}},
+  "description": "alice -- role: admin"
+}

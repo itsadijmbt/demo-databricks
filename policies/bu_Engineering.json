@@ -1,0 +1,11 @@
+{
+  "policy_id": "bu:Engineering",
+  "version": "0.2.4",
+  "scope": "global",
+  "resources": ["tool:databricks-remote-proxy/**","tool:github-remote-proxy/**","tool:*/generate","tool:*/complete"],
+  "extends": "company:macaw",
+  "constraints": {"parameters": {
+    "tool:*/complete": {"max_tokens": {"max": 800000}, "model": ["claude-opus-4-8"]},
+    "tool:*/generate": {"max_tokens": {"max": 800000}, "model": ["claude-opus-4-8"]}}},
+  "description": "Engineering BU."
+}

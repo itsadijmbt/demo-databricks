@@ -1,0 +1,14 @@
+{
+  "policy_id": "user:aditya",
+  "version": "0.2.0",
+  "scope": "global",
+  "resources": ["tool:databricks-remote-proxy/execute_sql","tool:databricks-remote-proxy/execute_sql_read_only","tool:*/generate","tool:*/complete"],
+  "extends": "bu:Analytics",
+  "constraints": {
+    "attestations": {"allow_update": {"approval_criteria": "role:admin","one_time": true,"timeout": 300}},
+    "denied_parameters": {
+      "tool:databricks-remote-proxy/execute_sql": {"query": ["*DROP *","*drop *","*DELETE *","*delete *","*TRUNCATE*","*truncate*","*ALTER *","*alter *","*REVOKE*","*revoke*","*GRANT *","*grant *","*VACUUM*","*vacuum*","*hr_salaries*"]},
+      "tool:databricks-remote-proxy/execute_sql_read_only": {"query": ["*DROP *","*drop *","*DELETE *","*delete *","*INSERT *","*insert *","*UPDATE *","*update *","*ALTER *","*alter *","*CREATE *","*create *","*TRUNCATE*","*truncate*","*MERGE *","*merge *","*GRANT *","*grant *","*REVOKE*","*revoke*","*VACUUM*","*vacuum*","*COPY INTO*","*copy into*","*hr_salaries*"]}}},
+  "attestations": ["allow_update::{ params.query MATCHES '*INSERT INTO*' OR params.query MATCHES '*insert into*' OR params.query MATCHES '*UPDATE *' OR params.query MATCHES '*update *' OR params.query MATCHES '*MERGE INTO*' OR params.query MATCHES '*merge into*' OR params.query MATCHES '*CREATE TABLE*' OR params.query MATCHES '*create table*' OR params.query MATCHES '*COPY INTO*' OR params.query MATCHES '*copy into*' }"],
+  "description": "aditya -- role: analyst"
+}
