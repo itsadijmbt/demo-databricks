@@ -2,13 +2,76 @@
   "policy_id": "app:databricks-remote-proxy",
   "version": "0.2.7",
   "scope": "global",
-  "resources": ["tool:databricks-remote-proxy/**"],
+  "resources": [
+    "tool:databricks-remote-proxy/**"
+  ],
   "constraints": {
     "denied_parameters": {
-      "tool:databricks-remote-proxy/execute_sql": {"query": ["*DROP *","*drop *","*DELETE *","*delete *","*TRUNCATE*","*truncate*","*ALTER *","*alter *","*REVOKE*","*revoke*","*GRANT *","*grant *","*VACUUM*","*vacuum*","*hr_salaries*"]},
-      "tool:databricks-remote-proxy/execute_sql_read_only": {"query": ["*DROP *","*drop *","*DELETE *","*delete *","*INSERT *","*insert *","*UPDATE *","*update *","*ALTER *","*alter *","*CREATE *","*create *","*TRUNCATE*","*truncate*","*MERGE *","*merge *","*GRANT *","*grant *","*REVOKE*","*revoke*","*VACUUM*","*vacuum*","*COPY INTO*","*copy into*","*hr_salaries*"]}},
+      "tool:databricks-remote-proxy/execute_sql": {
+        "query": [
+          "*DROP *",
+          "*drop *",
+          "*DELETE *",
+          "*delete *",
+          "*TRUNCATE*",
+          "*truncate*",
+          "*ALTER *",
+          "*alter *",
+          "*REVOKE*",
+          "*revoke*",
+          "*GRANT *",
+          "*grant *",
+          "*VACUUM*",
+          "*vacuum*",
+          "*hr_salaries*"
+        ]
+      },
+      "tool:databricks-remote-proxy/execute_sql_read_only": {
+        "query": [
+          "*DROP *",
+          "*drop *",
+          "*DELETE *",
+          "*delete *",
+          "*INSERT *",
+          "*insert *",
+          "*UPDATE *",
+          "*update *",
+          "*ALTER *",
+          "*alter *",
+          "*CREATE *",
+          "*create *",
+          "*TRUNCATE*",
+          "*truncate*",
+          "*MERGE *",
+          "*merge *",
+          "*GRANT *",
+          "*grant *",
+          "*REVOKE*",
+          "*revoke*",
+          "*VACUUM*",
+          "*vacuum*",
+          "*COPY INTO*",
+          "*copy into*",
+          "*hr_salaries*"
+        ]
+      }
+    },
     "parameters": {
-      "tool:databricks-remote-proxy/execute_sql": {"query": {"max_length": 5000,"min_length": 1,"type": "string"}},
-      "tool:databricks-remote-proxy/execute_sql_read_only": {"query": {"max_length": 5000,"min_length": 1,"type": "string"}}}},
+      "tool:databricks-remote-proxy/execute_sql": {
+        "query": {
+          "max_length": 5000,
+          "min_length": 1,
+          "type": "string"
+        }
+      },
+      "tool:databricks-remote-proxy/execute_sql_read_only": {
+        "query": {
+          "max_length": 5000,
+          "min_length": 1,
+          "type": "string"
+        }
+      }
+    }
+  },
   "description": "Databricks Managed MCP via SecureMCPProxy ."
 }
