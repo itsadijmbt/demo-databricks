@@ -183,3 +183,18 @@ APPROVER_USER="alice@macaw.com" APPROVER_PW="test@123" APPROVER_ROLE="admin" \
 ```
 This lists pending attestations and approves them. (Approve as the role the gate requires 
 `role:admin` = alice.)
+
+
+  ┌─────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬──────────────────────────────────┐
+  │  #  │                                                          Type in Claude                                                           │             Expected             │
+  ├─────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────┤
+  │ a   │ Using databricks-MACAW-aditya, run: SELECT name, base_salary, bonus FROM workspace.macaw_demo.eng_comp WHERE employee_id=1        │ ✅ runs free                     │
+  ├─────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────┤
+  │ b   │ Using databricks-MACAW-aditya, run: UPDATE workspace.macaw_demo.eng_comp SET bonus=50000 WHERE employee_id=1                      │ ⏸  bob approves                 │
+  ├─────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────┤
+  │ c   │ Using databricks-MACAW-aditya, run: INSERT INTO workspace.macaw_demo.eng_comp VALUES (5,'Gita Rao','Analytics','L5',170000,30000) │ ⏸  bob approves                 │
+  ├─────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────┤
+  │ d   │ Using databricks-MACAW-aditya, run: DELETE FROM workspace.macaw_demo.eng_comp WHERE employee_id=2                                 │ ⏸  alice approves; bob rejected │
+  ├─────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────┤
+  │ e   │ Using databricks-MACAW-aditya, run: DROP TABLE workspace.macaw_demo.eng_comp                                                      │    hard-denied, no approval      │
+  └─────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴──────────────────────────────────┘
