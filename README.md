@@ -3,6 +3,9 @@
 A portable walkthrough for running the MACAW per-user MCP gateway demo (GitHub + Databricks),
 governed by MACAW identity + policy. Works from **any** folder : everything keys off `$DEMO_ROOT`.
 
+"Unity Catalog enforces who's eligible, at the engine, for every path  but it can't tell INSERT from DELETE, and it can't pause for a human. MACAW adds per-action, role-tiered, 
+just-in-time human approval on the agent's path  SELECT runs, an UPDATE needs a manager, a DELETE needs an admin  GA today, and the same gate spans GitHub and the model. Use both: UC 
+for standing engine-level grants, MACAW for the agent's just-in-time sign-offs.
 ---
 
 ## 0. What this demo proves
@@ -176,5 +179,5 @@ cd "$DEMO_ROOT/demo"
 APPROVER_USER="alice@macaw.com" APPROVER_PW="test@123" APPROVER_ROLE="admin" \
   python approve.py
 ```
-This lists pending attestations and approves them. (Approve as the role the gate requires —
+This lists pending attestations and approves them. (Approve as the role the gate requires 
 `role:admin` = alice.)
