@@ -39,6 +39,29 @@ MACAW_PASSWORD     = os.environ["MACAW_PASSWORD"]
 DATABRICKS_TOKEN   = os.environ["DATABRICKS_TOKEN"]
 DATABRICKS_MCP_URL = "https://dbc-492b5d82-20eb.cloud.databricks.com/api/2.0/mcp/sql"
 
+# --- SDK timeout workaround (see changes_in_sdk.md) -------------------------------
+# SecureMCPProxy._create_http_client builds httpx.AsyncClient(headers=...) with NO
+# timeout -> httpx falls back to its 5s default. The MCP SDK's OWN recommended client
+# (create_mcp_http_client) uses read=300s for long-running tools. Databricks execute_sql
+# is async: on a cold serverless warehouse the call/poll can take >5s, so the 5s default
+# times out / drops the connection. We restore the SDK-recommended timeouts. read=300 is
+# the universal MCP default (not Databricks-specific); connect/write/pool=30 are required
+# because httpx forces all four (or a single default) to be set.
+import httpx as _httpx
+def _timed_create_http_client(self):
+    ua = self.upstream_auth
+    headers = {}
+    if getattr(ua, "type", None) == "bearer" and getattr(ua, "token", None):
+        headers["Authorization"] = f"Bearer {ua.token}"
+    elif getattr(ua, "type", None) == "api_key" and getattr(ua, "api_key", None):
+        headers[getattr(ua, "header_name", None) or "X-API-Key"] = ua.api_key
+    return _httpx.AsyncClient(
+        headers=headers or None,
+        timeout=_httpx.Timeout(connect=30, read=300, write=30, pool=30),
+    )
+SecureMCPProxy._create_http_client = _timed_create_http_client   # covers discovery + per-call
+# ---------------------------------------------------------------------------------
+
 proxy = SecureMCPProxy(
     app_name="databricks-remote-proxy",
     upstream_url=DATABRICKS_MCP_URL,
