@@ -2,13 +2,13 @@
 databricks-MACAW-aditya  --  Databricks managed SQL MCP via SecureMCPProxy, bound to aditya (analyst).
 
     claude mcp add databricks-MACAW-aditya --scope user \
-      -- bash -lc 'source /home/itsadijmbt/demo4/venv/bin/activate && \
-         export MACAW_HOME="/home/itsadijmbt/demo4/macaw-client-0.9.9.2-Linux-x86_64-py3.12" && \
+      -- bash -lc 'source /home/itsadijmbt/demo5/venv/bin/activate && \
+         MACAW_HOME="/home/itsadijmbt/demo5/macaw-client-0.9.9.6-Linux-x86_64-py3.12" && \
          export MACAW_USERID="aditya" && \
          export MACAW_USER="adibhatt2203@gmail.com" && \
          export MACAW_PASSWORD="test@123" && \
-         export DATABRICKS_TOKEN="refer-to-the-internal-google-doc" && \
-         cd /home/itsadijmbt/demo4/demo && \
+         export DATABRICKS_TOKEN="xxx" && \
+         cd /home/itsadijmbt/demo5/demo-databricks && \
          python databricks_MACAW_aditya.py'
 """
 
