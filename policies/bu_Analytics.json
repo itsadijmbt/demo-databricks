@@ -1,9 +1,10 @@
 {
   "policy_id": "bu:Analytics",
-  "version": "0.2.4",
+  "version": "0.2.6",
   "scope": "global",
   "resources": [
     "tool:databricks-remote-proxy/**",
+    "tool:securemcp-snowflake-mcp/**",
     "tool:*/generate",
     "tool:*/complete"
   ],
