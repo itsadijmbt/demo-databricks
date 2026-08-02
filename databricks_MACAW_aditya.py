@@ -1,18 +1,13 @@
 """
 databricks-MACAW-aditya  --  Databricks managed SQL MCP via SecureMCPProxy, bound to aditya (analyst).
 
-Per-user gateway: secCC does NOT propagate identity, so the caller is baked in here
-(RemoteIdentityProvider login -> JWT -> MACAWClient). secCC spawns this stdio server;
-each tools/call is relayed through the mesh AS aditya -> proxy -> Databricks SQL.
-
-REGISTER (token passed as an env export in the register command -- NOT stored in this file):
     claude mcp add databricks-MACAW-aditya --scope user \
       -- bash -lc 'source /home/itsadijmbt/demo4/venv/bin/activate && \
          export MACAW_HOME="/home/itsadijmbt/demo4/macaw-client-0.9.9.2-Linux-x86_64-py3.12" && \
          export MACAW_USERID="aditya" && \
          export MACAW_USER="adibhatt2203@gmail.com" && \
          export MACAW_PASSWORD="test@123" && \
-         export DATABRICKS_TOKEN="xxx" && \
+         export DATABRICKS_TOKEN="refer-to-the-internal-google-doc" && \
          cd /home/itsadijmbt/demo4/demo && \
          python databricks_MACAW_aditya.py'
 """
@@ -22,31 +17,20 @@ import sys
 import json
 import asyncio
 import logging
-
+import httpx
 from macaw_adapters.mcp import SecureMCPProxy
 from macaw_client import MACAWClient, RemoteIdentityProvider
 
-from mcp.server import Server
-from mcp.server.stdio import stdio_server
-import mcp.types as types
 
 logging.basicConfig(level=logging.INFO, stream=sys.stderr)
 
-# --- identity + creds: ALL via env exports in the register command (nothing hardcoded) ---
 USERID             = os.environ["MACAW_USERID"]
 MACAW_USER         = os.environ["MACAW_USER"]
 MACAW_PASSWORD     = os.environ["MACAW_PASSWORD"]
 DATABRICKS_TOKEN   = os.environ["DATABRICKS_TOKEN"]
 DATABRICKS_MCP_URL = "https://dbc-492b5d82-20eb.cloud.databricks.com/api/2.0/mcp/sql"
 
-# --- SDK timeout workaround (see changes_in_sdk.md) -------------------------------
-# SecureMCPProxy._create_http_client builds httpx.AsyncClient(headers=...) with NO
-# timeout -> httpx falls back to its 5s default. The MCP SDK's OWN recommended client
-# (create_mcp_http_client) uses read=300s for long-running tools. Databricks execute_sql
-# is async: on a cold serverless warehouse the call/poll can take >5s, so the 5s default
-# times out / drops the connection. We restore the SDK-recommended timeouts. read=300 is
-# the universal MCP default (not Databricks-specific); connect/write/pool=30 are required
-# because httpx forces all four (or a single default) to be set.
+
 import httpx as _httpx
 def _timed_create_http_client(self):
     ua = self.upstream_auth
@@ -59,8 +43,7 @@ def _timed_create_http_client(self):
         headers=headers or None,
         timeout=_httpx.Timeout(connect=30, read=300, write=30, pool=30),
     )
-SecureMCPProxy._create_http_client = _timed_create_http_client   # covers discovery + per-call
-# ---------------------------------------------------------------------------------
+SecureMCPProxy._create_http_client = _timed_create_http_client   
 
 proxy = SecureMCPProxy(
     app_name="databricks-remote-proxy",
@@ -74,30 +57,18 @@ bound = proxy.bind_to_user(MACAWClient(
 print(f"[databricks-MACAW-{USERID}] bound to {MACAW_USER} -- "
       f"{len(proxy.list_tools())} tools", file=sys.stderr)
 
-srv = Server(f"databricks-macaw-{USERID}")
+
+import macaw_adapters.mcp._endpoint as _endpoint
+
+_StubClient = _endpoint.Client
 
 
-@srv.list_tools()
-async def _list():
-    return [types.Tool(name=t["name"], description=t.get("description", ""),
-                       inputSchema=t.get("schema") or {"type": "object"})
-            for t in proxy.list_tools()]
+def _bound_stub_client(name):
+    stub = _StubClient(name)
+    stub.macaw_client = bound.user_client
+    return stub
 
 
-@srv.call_tool()
-async def _call(name, arguments):
-    try:
-        r = bound.call_tool(name, arguments or {})
-        text = json.dumps(r, default=str) if isinstance(r, (dict, list)) else str(r)
-    except Exception as e:
-        text = f"MACAW deny / upstream error: {e}"
-    return [types.TextContent(type="text", text=text)]
+_endpoint.Client = _bound_stub_client
 
-
-async def _serve():
-    async with stdio_server() as (rd, wr):
-        await srv.run(rd, wr, srv.create_initialization_options())
-
-
-if __name__ == "__main__":
-    asyncio.run(_serve())
+proxy.run()   
