@@ -18,15 +18,9 @@ A single human runs Claude/secCC. They register **per-user gateways** (`github-M
 - **Face A** : a real stdio MCP server (so Claude can spawn it).
 - **Face B** : a MACAW mesh client **bound to one user's JWT** (alice / bob / aditya).
 
-
 ---
 
-## 1. What's portable vs what you supply
-
-
----
-
-## 2. One-time setup (from any path)
+## 1. One-time setup (from any path)
 
 ```bash
 # 1) point DEMO_ROOT at wherever you put the demo4 folder
@@ -51,7 +45,7 @@ python -c "import macaw_client, macaw_adapters; print('ok')"
 
 
 
-### 3 Identity bridge / claims mapping
+### 2. Identity bridge / claims mapping
 
 Paste this into the MACAW Console → **Settings → Identity Providers → Configure Identity
 Provider (Auth0) → Claims Mapping → Review & Save**. Keep exactly **one** provider block
@@ -102,7 +96,7 @@ Each user's `app_metadata` must contain `"username": "<short id>"` : that's the 
 
 ---
 
-## 4. Register the gateways with Claude
+## 3. Register the gateways with Claude
 
 
 
@@ -120,7 +114,7 @@ Each user's `app_metadata` must contain `"username": "<short id>"` : that's the 
 ```
 
 
-## 5. Approving attestations
+## 4. Approving attestations
 
 When a call needs an attestation use file or console directly.
 ```bash
