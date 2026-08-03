@@ -1,6 +1,6 @@
 # MACAW demo4 : Run-Anywhere Guide
 
-A portable walkthrough for running the MACAW per-user MCP gateway demo (GitHub + Databricks),
+A portable walkthrough for running the MACAW per-user MCP demo,
 governed by MACAW identity + policy. Works from **any** folder : everything keys off `$DEMO_ROOT`.
 
 Unity Catalog enforces who's eligible, at the engine, for every path  but it can't tell INSERT from DELETE, and it can't pause for a human. MACAW adds per-action, role-tiered, 
@@ -18,23 +18,11 @@ A single human runs Claude/secCC. They register **per-user gateways** (`github-M
 - **Face A** : a real stdio MCP server (so Claude can spawn it).
 - **Face B** : a MACAW mesh client **bound to one user's JWT** (alice / bob / aditya).
 
-So every tool call is relayed *as that user* → MACAW enforces **that user's policy**
-(allow / deny / attestation) before the call reaches GitHub or Databricks.
-Same machine, same upstream token : **different governance per persona**. That's the point.
 
 ---
 
 ## 1. What's portable vs what you supply
 
-| Portable (carry the `demo4/` folder) | You must supply per environment |
-|---|---|
-| `demo/` gateway scripts, `test_jwt.py`, `approve.py`, `policies/` | A **GitHub PAT** (`GITHUB_TOKEN`) |
-| The wheel + `secureAI/` source | A **Databricks token + workspace URL** (`DATABRICKS_TOKEN`, `DATABRICKS_MCP_URL`) |
-| `…/.macaw/config.json` (MACAW tenant api_key + endpoint) | Claude Code installed (`claude` CLI) |
-
-The Auth0 **test users** (`alice@macaw.com`, `bob@macaw.com`, `buszadi1@gmail.com`,
-`adibhatt2203@gmail.com`, all password `test@123`) and the **MACAW tenant** travel with the
-config : you reuse the same ones. Only the **upstream tokens** (GitHub/Databricks) are yours.
 
 ---
 
@@ -57,39 +45,13 @@ pip install "$MACAW_HOME/secureAI[all]"
 python -c "import macaw_client, macaw_adapters; print('ok')"
 ```
 
-> **Gotcha #1 (the #1 cause of `-32000`):** `MACAW_HOME` must point at the **wheel dir**, not
-> `demo4/`. The `.macaw/config.json` lives *inside* the wheel dir. Point it at `demo4/` and you
-> get `MACAW endpoint not configured` → tools never register on the mesh → gateway dies on
-> startup → Claude shows `-32000`.
 
-To use **your own** MACAW tenant instead of the demo's, replace the `api_key` in
-`$MACAW_HOME/.macaw/config.json` (that key *is* the tenant : see the MACAW console).
 
 ---
 
-## 3. Verify identity before touching gateways
 
-```bash
-cd "$DEMO_ROOT/demo"
-python test_jwt.py
-```
-Expect every user to bind: `org=macaw  bu=…  roles=[…]  username=<x> -> user:<x>`.
 
-> **Gotcha #2:** alice/bob log in with `@macaw.com` (their Auth0 **email**), not `@macaw.test`
-> and not `alice@macaw`. buszadi1/aditya are the gmail addresses. Wrong email → `403 Wrong
-> email or password`. The username→policy mapping:
-
-| login email | `username` claim | policy id |
-|---|---|---|
-| `alice@macaw.com` | `alice` | `user:alice` |
-| `bob@macaw.com` | `bob` | `user:bob` |
-| `buszadi1@gmail.com` | `buszadi1` | `user:buszadi1` |
-| `adibhatt2203@gmail.com` | `aditya` | `user:aditya` |
-
-`test_jwt.py` checks the **token** only. For `user:<x>` to actually bind at policy time, the
-MACAW **identity bridge** must map `name_path = https://macaw.local/username`.
-
-### Identity bridge / claims mapping
+### 3 Identity bridge / claims mapping
 
 Paste this into the MACAW Console → **Settings → Identity Providers → Configure Identity
 Provider (Auth0) → Claims Mapping → Review & Save**. Keep exactly **one** provider block
@@ -142,53 +104,29 @@ Each user's `app_metadata` must contain `"username": "<short id>"` : that's the 
 
 ## 4. Register the gateways with Claude
 
-Each gateway is registered as its own MCP server. **All creds come from env exports in the
-register command : nothing is hardcoded in the `.py`.** Re-add per user:
 
-### GitHub : bob (manager)
-```bash
-claude mcp add github-MACAW-bob --scope user \
-  -- bash -lc 'source '"$DEMO_ROOT"'/venv/bin/activate && \
-     export MACAW_HOME="'"$DEMO_ROOT"'/macaw-client-0.9.9.2-Linux-x86_64-py3.12" && \
-     export MACAW_USERID="bob" && \
-     export MACAW_USER="bob@macaw.com" && \
-     export MACAW_PASSWORD="test@123" && \
-     export GITHUB_TOKEN="<YOUR_GITHUB_PAT>" && \
-     cd '"$DEMO_ROOT"'/demo && python github_MACAW_bob.py'
-```
 
-### Databricks : alice (admin)
+### Databricks : aditya (analyst)
 ```bash
-claude mcp add databricks-MACAW-alice --scope user \
-  -- bash -lc 'source '"$DEMO_ROOT"'/venv/bin/activate && \
-     export MACAW_HOME="'"$DEMO_ROOT"'/macaw-client-0.9.9.2-Linux-x86_64-py3.12" && \
-     export MACAW_USERID="alice" && \
-     export MACAW_USER="alice@macaw.com" && \
-     export MACAW_PASSWORD="test@123" && \
-     export DATABRICKS_TOKEN="<YOUR_DATABRICKS_TOKEN>" && \
-     export DATABRICKS_MCP_URL="https://<your-workspace>.cloud.databricks.com/api/2.0/mcp/sql" && \
-     cd '"$DEMO_ROOT"'/demo && python databricks_MACAW_alice.py'
+    claude mcp add databricks-MACAW-aditya --scope user \
+      -- bash -lc 'source /home/itsadijmbt/demo5/venv/bin/activate && \
+         MACAW_HOME="/home/itsadijmbt/demo5/macaw-client-0.9.9.6-Linux-x86_64-py3.12" && \
+         export MACAW_USERID="aditya" && \
+         export MACAW_USER="adibhatt2203@gmail.com" && \
+         export MACAW_PASSWORD="test@123" && \
+         export DATABRICKS_TOKEN="xxx" && \
+         cd /home/itsadijmbt/demo5/demo-databricks && \
+         python databricks_MACAW_aditya.py'
 ```
 
 
 ## 5. Approving attestations
 
-When a call needs an attestation (e.g. aditya's `INSERT` → `allow_update`, criteria
-`role:admin`), an admin approves it:
-
+When a call needs an attestation use file or console directly.
 ```bash
-cd "$DEMO_ROOT/demo"
-APPROVER_USER="alice@macaw.com" APPROVER_PW="test@123" APPROVER_ROLE="admin" \
-  python approve.py
+  python approve_bob.py
+ 
 ```
-This lists pending attestations and approves them. (Approve as the role the gate requires 
-`role:admin` = alice.)
 
 
-## 6 Testing Queries.
-
-Using databricks-MACAW-aditya, run: SELECT name, base_salary, bonus FROM workspace.macaw_demo.eng_comp WHERE employee_id=1  ✅ runs free                     
-Using databricks-MACAW-aditya, run: UPDATE workspace.macaw_demo.eng_comp SET bonus=50000 WHERE employee_id=1                       ⏸  bob approves                 
-Using databricks-MACAW-aditya, run: INSERT INTO workspace.macaw_demo.eng_comp VALUES (5,'Gita Rao','Analytics','L5',170000,30000)  ⏸  bob approves                 
-Using databricks-MACAW-aditya, run: DELETE FROM workspace.macaw_demo.eng_comp WHERE employee_id=2                                  ⏸  alice approves; bob rejected 
-Using databricks-MACAW-aditya, run: DROP TABLE workspace.macaw_demo.eng_comp                                                          hard-denied, no approval      
+                                                      hard-denied, no approval      
