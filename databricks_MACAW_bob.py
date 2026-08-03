@@ -7,13 +7,13 @@ each tools/call is relayed through the mesh AS bob -> proxy -> Databricks SQL.
 
 REGISTER (token passed as an env export in the register command -- NOT stored in this file):
     claude mcp add databricks-MACAW-bob --scope user \
-      -- bash -lc 'source /home/itsadijmbt/demo4/venv/bin/activate && \
-         export MACAW_HOME="/home/itsadijmbt/demo4/macaw-client-0.9.9.2-Linux-x86_64-py3.12" && \
+      -- bash -lc 'source path/to/env && \
+         export MACAW_HOME="path/to/whl" && \
          export MACAW_USERID="bob" && \
          export MACAW_USER="bob@macaw.com" && \
          export MACAW_PASSWORD="test@123" && \
          export DATABRICKS_TOKEN="xxx" && \
-         cd /home/itsadijmbt/demo4/demo && \
+         cd path/to/dir && \
          python databricks_MACAW_bob.py'
 """
 
