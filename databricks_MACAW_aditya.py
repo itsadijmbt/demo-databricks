@@ -31,44 +31,14 @@ DATABRICKS_TOKEN   = os.environ["DATABRICKS_TOKEN"]
 DATABRICKS_MCP_URL = "https://dbc-492b5d82-20eb.cloud.databricks.com/api/2.0/mcp/sql"
 
 
-import httpx as _httpx
-def _timed_create_http_client(self):
-    ua = self.upstream_auth
-    headers = {}
-    if getattr(ua, "type", None) == "bearer" and getattr(ua, "token", None):
-        headers["Authorization"] = f"Bearer {ua.token}"
-    elif getattr(ua, "type", None) == "api_key" and getattr(ua, "api_key", None):
-        headers[getattr(ua, "header_name", None) or "X-API-Key"] = ua.api_key
-    return _httpx.AsyncClient(
-        headers=headers or None,
-        timeout=_httpx.Timeout(connect=30, read=300, write=30, pool=30),
-    )
-SecureMCPProxy._create_http_client = _timed_create_http_client   
+   
 
 proxy = SecureMCPProxy(
     app_name="databricks-remote-proxy",
     upstream_url=DATABRICKS_MCP_URL,
     upstream_auth={"type": "bearer", "token": DATABRICKS_TOKEN},
 )
-jwt_token, _ = RemoteIdentityProvider().login(MACAW_USER, MACAW_PASSWORD)
-bound = proxy.bind_to_user(MACAWClient(
-    app_name=f"databricks-macaw-{USERID}", agent_type="user",
-    user_name=MACAW_USER, iam_token=jwt_token))
-print(f"[databricks-MACAW-{USERID}] bound to {MACAW_USER} -- "
-      f"{len(proxy.list_tools())} tools", file=sys.stderr)
 
 
-import macaw_adapters.mcp._endpoint as _endpoint
-
-_StubClient = _endpoint.Client
-
-
-def _bound_stub_client(name):
-    stub = _StubClient(name)
-    stub.macaw_client = bound.user_client
-    return stub
-
-
-_endpoint.Client = _bound_stub_client
 
 proxy.run()   
